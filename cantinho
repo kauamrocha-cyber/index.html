@@ -1,0 +1,604 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Cantinho | Tarefas de Casa</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f4;
+            color: #263b37;
+        }
+
+        header {
+            background: #244d45;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header p {
+            color: #d1e7df;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+        }
+
+        button {
+            border: none;
+            padding: 11px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        nav button {
+            background: #e4eeea;
+            color: #244d45;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 30px auto;
+            padding: 0 16px;
+        }
+
+        .painel {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px #00000008;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd8d3;
+            border-radius: 8px;
+            margin: 7px 0 14px;
+            background: white;
+        }
+
+        .adicionar {
+            width: 100%;
+            background: #347d69;
+            color: white;
+        }
+
+        .tarefa {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 0;
+            border-bottom: 1px solid #e5ece8;
+        }
+
+        .tarefa input {
+            width: 18px;
+            margin: 0;
+        }
+
+        .descricao {
+            flex: 1;
+            overflow-wrap: anywhere;
+        }
+
+        .concluida {
+            text-decoration: line-through;
+            color: #899791;
+        }
+
+        .excluir {
+            background: #ffeded;
+            color: #b53d3d;
+        }
+
+        .info {
+            display: flex;
+            gap: 12px;
+        }
+
+        .info div {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            background: #e7f3ed;
+            text-align: center;
+        }
+
+        .info strong {
+            display: block;
+            font-size: 25px;
+        }
+
+        .secao {
+            display: none;
+        }
+
+        .secao.ativa {
+            display: block;
+        }
+
+        .secundario {
+            background: #e7f3ed;
+            color: #244d45;
+        }
+
+        @media (max-width: 500px) {
+            .info {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🏡 Meu Cantinho</h1>
+    <p>Organize sua casa, uma tarefa de cada vez!</p>
+</header>
+
+<nav>
+    <button onclick="abrirAba('inicio')">Início</button>
+    <button onclick="abrirAba('tarefas')">Minhas tarefas</button>
+    <button onclick="abrirAba('layouts')">Layouts salvos</button>
+</nav>
+
+<main class="container">
+
+    <section id="inicio" class="secao ativa">
+        <div class="painel">
+            <h2>Resumo da sua rotina</h2>
+
+            <div class="info">
+                <div>
+                    <strong id="total">0</strong>
+                    Total
+                </div>
+
+                <div>
+                    <strong id="pendentes">0</strong>
+                    Pendentes
+                </div>
+
+                <div>
+                    <strong id="feitas">0</strong>
+                    Concluídas
+                </div>
+            </div>
+        </div>
+
+        <div class="painel">
+            <h2>Adicionar tarefa</h2>
+
+            <form id="formulario">
+                <label for="nome">Nome da tarefa</label>
+                <input
+                    id="nome"
+                    type="text"
+                    placeholder="Ex.: Arrumar meu quarto"
+                    required
+                >
+
+                <label for="categoria">Categoria</label>
+                <select id="categoria">
+                    <option>Limpeza</option>
+                    <option>Quarto</option>
+                    <option>Cozinha</option>
+                    <option>Lavanderia</option>
+                    <option>Compras</option>
+                    <option>Organização</option>
+                    <option>Outros</option>
+                </select>
+
+                <label for="data">Data da tarefa</label>
+                <input id="data" type="date">
+
+                <button class="adicionar" type="submit">
+                    + Adicionar tarefa
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <section id="tarefas" class="secao">
+        <div class="painel">
+            <h2>Minhas tarefas</h2>
+
+            <label for="filtro">Filtrar por categoria</label>
+            <select id="filtro" onchange="mostrarTarefas()">
+                <option value="Todas">Todas</option>
+                <option>Limpeza</option>
+                <option>Quarto</option>
+                <option>Cozinha</option>
+                <option>Lavanderia</option>
+                <option>Compras</option>
+                <option>Organização</option>
+                <option>Outros</option>
+            </select>
+
+            <div id="lista"></div>
+
+            <p id="mensagem"></p>
+
+            <button class="secundario" onclick="exportarBackup()">
+                Salvar backup
+            </button>
+
+            <button class="secundario" onclick="document.getElementById('arquivo').click()">
+                Carregar backup
+            </button>
+
+            <input
+                id="arquivo"
+                type="file"
+                accept=".json,application/json"
+                hidden
+                onchange="importarBackup(event)"
+            >
+        </div>
+    </section>
+
+    <section id="layouts" class="secao">
+        <div class="painel">
+            <h2>Layouts salvos</h2>
+            <p>Guarde uma lista para reutilizar em outro dia.</p>
+
+            <label for="nomeLayout">Nome do layout</label>
+            <input
+                id="nomeLayout"
+                placeholder="Ex.: Limpeza de sábado"
+            >
+
+            <button class="adicionar" onclick="salvarLayout()">
+                Salvar lista atual como layout
+            </button>
+
+            <div id="listaLayouts"></div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    let tarefas = [];
+    let layouts = [];
+
+    // Recupera os dados salvos no navegador.
+    try {
+        tarefas = JSON.parse(
+            localStorage.getItem("minhasTarefas")
+        ) || [];
+
+        layouts = JSON.parse(
+            localStorage.getItem("meusLayouts")
+        ) || [];
+    } catch (erro) {
+        tarefas = [];
+        layouts = [];
+    }
+
+    function salvarDados() {
+        localStorage.setItem(
+            "minhasTarefas",
+            JSON.stringify(tarefas)
+        );
+
+        localStorage.setItem(
+            "meusLayouts",
+            JSON.stringify(layouts)
+        );
+
+        atualizar();
+    }
+
+    function abrirAba(nome) {
+        document.querySelectorAll(".secao").forEach(secao => {
+            secao.classList.remove("ativa");
+        });
+
+        document.getElementById(nome).classList.add("ativa");
+
+        if (nome === "layouts") {
+            mostrarLayouts();
+        }
+
+        if (nome === "tarefas") {
+            mostrarTarefas();
+        }
+    }
+
+    document.getElementById("formulario").addEventListener(
+        "submit",
+        function(evento) {
+            evento.preventDefault();
+
+            const nome = document.getElementById("nome").value.trim();
+            const categoria = document.getElementById("categoria").value;
+            const data = document.getElementById("data").value;
+
+            if (!nome) return;
+
+            tarefas.push({
+                id: Date.now() + Math.random(),
+                nome: nome,
+                categoria: categoria,
+                data: data,
+                concluida: false
+            });
+
+            salvarDados();
+
+            this.reset();
+
+            alert("Tarefa adicionada e salva!");
+        }
+    );
+
+    function mostrarTarefas() {
+        const lista = document.getElementById("lista");
+        const filtro = document.getElementById("filtro").value;
+
+        lista.innerHTML = "";
+
+        const filtradas = tarefas.filter(tarefa =>
+            filtro === "Todas" || tarefa.categoria === filtro
+        );
+
+        if (filtradas.length === 0) {
+            lista.textContent = "Nenhuma tarefa encontrada.";
+            return;
+        }
+
+        filtradas.forEach(tarefa => {
+            const linha = document.createElement("div");
+            linha.className = "tarefa";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = tarefa.concluida;
+            checkbox.setAttribute(
+                "aria-label",
+                "Marcar tarefa como concluída"
+            );
+
+            checkbox.addEventListener("change", () => {
+                tarefa.concluida = checkbox.checked;
+                salvarDados();
+            });
+
+            const descricao = document.createElement("div");
+            descricao.className = "descricao";
+
+            const titulo = document.createElement("strong");
+            titulo.textContent = tarefa.nome;
+
+            if (tarefa.concluida) {
+                titulo.className = "concluida";
+            }
+
+            const detalhes = document.createElement("div");
+            detalhes.textContent =
+                tarefa.categoria +
+                (tarefa.data ? " • " + tarefa.data : "");
+
+            detalhes.style.fontSize = "12px";
+            detalhes.style.color = "#738078";
+
+            descricao.append(titulo, detalhes);
+
+            const excluir = document.createElement("button");
+            excluir.textContent = "Excluir";
+            excluir.className = "excluir";
+
+            excluir.addEventListener("click", () => {
+                if (confirm("Deseja excluir esta tarefa?")) {
+                    tarefas = tarefas.filter(item =>
+                        item.id !== tarefa.id
+                    );
+
+                    salvarDados();
+                }
+            });
+
+            linha.append(checkbox, descricao, excluir);
+            lista.appendChild(linha);
+        });
+    }
+
+    function atualizar() {
+        const feitas = tarefas.filter(
+            tarefa => tarefa.concluida
+        ).length;
+
+        document.getElementById("total").textContent =
+            tarefas.length;
+
+        document.getElementById("feitas").textContent = feitas;
+
+        document.getElementById("pendentes").textContent =
+            tarefas.length - feitas;
+
+        mostrarTarefas();
+        mostrarLayouts();
+    }
+
+    function salvarLayout() {
+        const nome = document.getElementById("nomeLayout")
+            .value.trim();
+
+        if (!nome) {
+            alert("Digite um nome para o layout.");
+            return;
+        }
+
+        layouts.push({
+            id: Date.now() + Math.random(),
+            nome: nome,
+            tarefas: tarefas.map(tarefa => ({
+                ...tarefa,
+                concluida: false
+            }))
+        });
+
+        localStorage.setItem(
+            "meusLayouts",
+            JSON.stringify(layouts)
+        );
+
+        document.getElementById("nomeLayout").value = "";
+
+        mostrarLayouts();
+
+        alert("Layout salvo! Você pode reutilizá-lo depois.");
+    }
+
+    function mostrarLayouts() {
+        const lista = document.getElementById("listaLayouts");
+        if (!lista) return;
+
+        lista.innerHTML = "";
+
+        if (layouts.length === 0) {
+            lista.textContent = "Você ainda não salvou nenhum layout.";
+            return;
+        }
+
+        layouts.forEach(layout => {
+            const caixa = document.createElement("div");
+            caixa.className = "tarefa";
+
+            const nome = document.createElement("strong");
+            nome.textContent =
+                layout.nome + " (" + layout.tarefas.length + " tarefas)";
+
+            const carregar = document.createElement("button");
+            carregar.textContent = "Carregar";
+            carregar.className = "secundario";
+
+            carregar.onclick = () => {
+                if (confirm(
+                    "Substituir a lista atual por este layout?"
+                )) {
+                    tarefas = layout.tarefas.map(tarefa => ({
+                        ...tarefa,
+                        id: Date.now() + Math.random(),
+                        concluida: false
+                    }));
+
+                    salvarDados();
+                    abrirAba("tarefas");
+                    alert("Layout carregado!");
+                }
+            };
+
+            const excluir = document.createElement("button");
+            excluir.textContent = "Excluir";
+            excluir.className = "excluir";
+
+            excluir.onclick = () => {
+                if (confirm("Excluir este layout salvo?")) {
+                    layouts = layouts.filter(item =>
+                        item.id !== layout.id
+                    );
+
+                    localStorage.setItem(
+                        "meusLayouts",
+                        JSON.stringify(layouts)
+                    );
+
+                    mostrarLayouts();
+                }
+            };
+
+            caixa.append(nome, carregar, excluir);
+            lista.appendChild(caixa);
+        });
+    }
+
+    function exportarBackup() {
+        const dados = JSON.stringify({
+            tarefas: tarefas,
+            layouts: layouts
+        }, null, 2);
+
+        const arquivo = new Blob(
+            [dados],
+            { type: "application/json" }
+        );
+
+        const url = URL.createObjectURL(arquivo);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "meu-cantinho-backup.json";
+        link.click();
+
+        URL.revokeObjectURL(url);
+    }
+
+    function importarBackup(evento) {
+        const arquivo = evento.target.files[0];
+
+        if (!arquivo) return;
+
+        const leitor = new FileReader();
+
+        leitor.onload = () => {
+            try {
+                const dados = JSON.parse(leitor.result);
+
+                if (
+                    !Array.isArray(dados.tarefas) ||
+                    !Array.isArray(dados.layouts)
+                ) {
+                    throw new Error("Arquivo inválido");
+                }
+
+                if (confirm("Importar vai substituir os dados atuais. Continuar?")) {
+                    tarefas = dados.tarefas;
+                    layouts = dados.layouts;
+
+                    salvarDados();
+
+                    alert("Backup carregado com sucesso!");
+                }
+            } catch (erro) {
+                alert("Não foi possível ler esse backup.");
+            }
+
+            evento.target.value = "";
+        };
+
+        leitor.readAsText(arquivo);
+    }
+
+    atualizar();
+</script>
+
+</body>
+</html>
